@@ -1,0 +1,26 @@
+steps:
+- id: 'Container image build and tagging by skaffold build'
+  name: gcr.io/k8s-skaffold/skaffold
+  args:
+    - skaffold
+    - build
+    - '--interactive=false'
+    - '--default-repo=${_DEFAUILT_REPOSITORY}'
+    - '--file-output=/workspace/artifacts.json'
+- name: gcr.io/google.com/cloudsdktool/cloud-sdk
+  entrypoint: gcloud
+  args:
+    [
+      'deploy', 'releases', 'create', 'rel-${SHORT_SHA}',
+      '--delivery-pipeline', '${_DELIVERY_PIPELINE_NAME}',
+      '--description', 'buildID=${BUILD_ID},commitId=${REVISION_ID}',
+      '--region', '${LOCATION}',
+      '--annotations', 'commitId=${REVISION_ID}',
+      '--build-artifacts', '/workspace/artifacts.json'
+    ]
+substitutions:
+  _DELIVERY_PIPELINE_NAME: hello-dp
+  _DEFAUILT_REPOSITORY: us-central1-docker.pkg.dev/${PROJECT_ID}/docker-repo
+options:
+  logging: CLOUD_LOGGING_ONLY
+

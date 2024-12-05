@@ -1,0 +1,18 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: hello-skaffold
+build:
+  artifacts: 
+  - image: hello
+    context: .
+  tagPolicy:
+    sha256: {}
+profiles:
+- name: hello-dev
+  manifests:
+    rawYaml:
+    - ./hello-dev.yaml
+  deploy:
+    cloudrun: {}
+
